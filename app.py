@@ -2,7 +2,9 @@ import os
 from flask import Flask, request
 from lib.database_connection import get_flask_database_connection
 from lib.album_repository import AlbumRepository
+from lib.artist_repository import ArtistRepository
 from lib.album import Album
+from lib.artist import Artist
 
 
 
@@ -31,6 +33,30 @@ def get_albums():
         album_strings.append(str(album))
     
     return '\n'.join(album_strings) # test expects string format
+
+@app.route('/artists', methods=['GET'])
+def get_artists():
+    connection = get_flask_database_connection(app)
+    repository = ArtistRepository(connection)
+    artists = repository.all()
+    # test expects comma-separated artist names
+    artist_names = []
+    for artist in artists:
+        artist_names.append(artist.name)
+    return ', '.join(artist_names)
+
+@app.route('/artists', methods=['POST'])
+def create_artist():
+    connection = get_flask_database_connection(app)
+    repository = ArtistRepository(connection)
+    artist = Artist(None, request.form['name'], request.form['genre'])
+    repository.create(artist)
+    return "", 200
+
+
+
+
+
 
 
 # == Example Code Below ==

@@ -75,8 +75,37 @@ Album(4, Super Trouper, 1980, 2)
 Album(5, Bossanova, 1990, 1)
 """
 
+def test_get_artists(db_connection, web_client):
+    """
+    Test GET /artists returns list of artist names
+    """
+    # seed databse 
+    db_connection.seed("seeds/record_store.sql")
+    # GET request
+    response = web_client.get("/artists")
+    # Assert successful response
+    assert response.status_code == 200
+    # Assert expected content (comma-separated artist names)
+    assert response.data.decode("utf-8") == "Pixies, ABBA, Taylor Swift, Nina Simone"
 
-
+def test_post_artist(db_connection, web_client):
+    """
+    Test POST /artists creates new artist and appears in GET /artists
+    """
+    # seed databse 
+    db_connection.seed("seeds/record_store.sql")
+    # POST new artist
+    post_response = web_client.post("/artists", data={
+        "name": "Wild nothing",
+        "genre": "Indie"
+    })
+    # Assert POST - see makers workbook for successfull response
+    assert post_response.status_code == 200
+    assert post_response.data.decode("utf-8") == ""
+    # Verify artist appears in GET /artists
+    get_response = web_client.get("/artists")
+    assert get_response.status_code == 200
+    assert get_response.data.decode("utf-8") == "Pixies, ABBA, Taylor Swift, Nina Simone, Wild nothing"
 
 
 
